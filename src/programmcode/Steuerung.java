@@ -2,8 +2,9 @@ package programmcode;
 
 public class Steuerung {
 	public static void main(String[]Args){
-		new Timer();
-		
+		Hintergrund hintergrund = new Hintergrund();
+		hintergrund.start();
+		hintergrund.stop();
 	}
 	
 }

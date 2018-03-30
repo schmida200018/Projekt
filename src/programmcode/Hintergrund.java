@@ -2,7 +2,7 @@ package programmcode;
 
 
 
-public class Timer implements Runnable{
+public class Hintergrund implements Runnable{
 	private boolean running;
 	
 	public static final int FPS = 144;
@@ -18,7 +18,7 @@ public class Timer implements Runnable{
 	}
 	
 	public void tick() {
-		
+		System.out.println("Test");
 	}
 	
 	public void render() {
