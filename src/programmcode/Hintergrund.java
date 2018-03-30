@@ -22,7 +22,7 @@ public class Hintergrund implements Runnable{
   
   
   public static final int FPS = 144;
-  public static final int TPS = 128;
+  public static final int TPS = 32;
 
   public Hintergrund() {
 	  screen = new Screen(this);
@@ -50,7 +50,9 @@ public class Hintergrund implements Runnable{
   }
   
   public void rechtecke() {  
-	  rechteck.add(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize().width/2,20,50,50));
+	  rechteck.add(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize().width/2,1020,50,50));
+	  rechteck.add(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize().width/2,500,50,50));
+	  System.out.println(""+rechteck.get(0).getHeight());
   }
   
   public void render() {
@@ -86,13 +88,22 @@ public class Hintergrund implements Runnable{
 	circle.setY(y);
     boolean colission = false;
 	for(int i = 0; i < rechteck.size(); i++) {
-    	double distance = (Math.abs(rechteck.get(i).getX()-circle.getX())+Math.abs(rechteck.get(i).getY()-circle.getY()));
-    	if(distance < circle.getR()) {
+    	double distance = (Math.abs(rechteck.get(i).getX()-circle.getX())+Math.abs(rechteck.get(i).getY()+14-circle.getY()));
+    	System.out.println(""+distance);
+    	if(distance < circle.getR()+14 ) {
     		colission = true;
+    		System.out.println("Colission");
     	}
+
     }
     if(colission) {
-    	my = 1;
+    	if(my == -1) {
+    		my = 1;
+    		colission = false;
+    	}else if(my == 1) {
+    		my = -1;
+    		colission = false;
+    	}
     }
     }
     
