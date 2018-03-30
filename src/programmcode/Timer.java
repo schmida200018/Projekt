@@ -22,7 +22,7 @@ public class Timer implements Runnable{
 	}
 	
 	public void render() {
-		
+		System.out.println("Test");
 	}
 	
 	@Override
