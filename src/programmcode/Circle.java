@@ -16,5 +16,10 @@ public class Circle {
 	public int getR() {
 		return r;
 	}
-	
+	public void setX(int pX) {
+		x = pX;
+	}
+	public void setY(int pY) {
+		y = pY;
+	}
 }
