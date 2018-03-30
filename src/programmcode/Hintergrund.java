@@ -44,7 +44,7 @@ public class Hintergrund implements Runnable{
     g.clearRect(0,0,screen.getWidth(),screen.getHeight());
     
     //Render start
-    g.fillRect(x,y,50,50);
+    g.fillOval(x, y, 50, 50);
     //Render ende
     
     g.dispose();
