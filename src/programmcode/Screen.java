@@ -23,12 +23,26 @@ public class Screen extends Canvas{
 	    		hintergrund.setLaeuft(true);
 	    	}
 	    });
+	    JButton buttonEnde = new JButton();
+	    buttonEnde.setBounds( Toolkit.getDefaultToolkit().getScreenSize().width-100, Toolkit.getDefaultToolkit().getScreenSize().height-160,50,40);
+	    buttonEnde.setText("Ende");
+	    buttonEnde.setMargin(new Insets(2,2,2,2));
+	    buttonEnde.addActionListener(new ActionListener() {
+	    	public void actionPerformed(ActionEvent e) {
+	    		System.exit(0);
+	    	}
+	    });
+	    
+	    
+	    
+	    frame.add(buttonEnde);
 	    frame.add(button);
 	    frame.setLayout(new BorderLayout());
 	    frame.add(this,BorderLayout.CENTER);
+	    
 	    /*frame.setUndecorated(true);
 	    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);*/
-	    
+	    frame.setUndecorated(true);
 	    frame.setVisible(true);
 }
 }

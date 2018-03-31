@@ -14,8 +14,8 @@ import java.awt.*;
 public class Hintergrund implements Runnable{
   private boolean running;
   private Screen screen;
-  private int x,y; 
-  private int mx, my;
+  private double x,y; 
+  private double mx, my;
   private ArrayList<Rectangle> rechteck = new ArrayList<Rectangle>();
   private boolean laeuft = false;
   private Circle circle = new Circle(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height-100,20);
@@ -31,12 +31,13 @@ public class Hintergrund implements Runnable{
   public synchronized void start(){
     running = true;
     new Thread(this).start();
-    mx = 1;
-    my = 0;
   }
   
   public void setLaeuft(boolean pLaeuft) {
 	  laeuft = pLaeuft;
+	  mx = -1;
+	  my = -0.1;
+	  System.out.println("Start");
   }
   
   public synchronized void stop(){
@@ -66,12 +67,12 @@ public class Hintergrund implements Runnable{
     Graphics g = bs.getDrawGraphics();
     g.clearRect(0,0,screen.getWidth(),screen.getHeight());
     for(int i = 0; i < rechteck.size(); i++){
-    	g.fillRect(rechteck.get(i).x,rechteck.get(i).y,rechteck.get(i).width,rechteck.get(i).height);
+    	g.fillRect((int)rechteck.get(i).x,(int)rechteck.get(i).y,rechteck.get(i).width,rechteck.get(i).height);
     }
     
     //Render start
     
-    g.fillOval(x,y, circle.getR(), circle.getR());
+    g.fillOval((int)x,(int)y,(int) circle.getR(),(int) circle.getR());
     
     //Render ende
     g.setColor(Color.blue);
@@ -89,26 +90,56 @@ public class Hintergrund implements Runnable{
 	circle.setX(x);
 	circle.setY(y);
     boolean colission = false;
+    boolean colissionX =  false;
+    boolean colissionY = false;
+    boolean ende = false;
 	for(int i = 0; i < rechteck.size(); i++) {
     	double distance = (Math.abs(rechteck.get(i).getX()+14-circle.getX())+Math.abs(rechteck.get(i).getY()+14-circle.getY()));
     	System.out.println(""+distance);
     	if(distance < circle.getR()+25 ) {
     		colission = true;
-    		System.out.println("Colission");
+    		double distanceX = (Math.abs(rechteck.get(i).getX()+14-circle.getX()));
+    		double distanceY = (Math.abs(rechteck.get(i).getY()+14-circle.getY()));
+    		if(distanceX < circle.getR()+25&&circle.getY()+14>rechteck.get(i).getY()) {
+    			colissionX = true;
+    		}else if(distanceY < circle.getR()+25&&circle.getY()+14>rechteck.get(i).getY()) {
+    			colissionY = true;
+    		}	
+    	
     	}
 
     }
-    if(colission) {
-    	if(my == -1) {
-    		my = 1;
-    	}else if(my == 1) {
-    		my = -1;
-    	}
-    	if(mx == -1) {
-    		mx = 1;
-    	}else if (mx==1) {
-    		mx = -1;
-    	}
+	if(circle.getX() <=0) {
+		colissionX = true;
+	}
+	if(circle.getX() >= Toolkit.getDefaultToolkit().getScreenSize().getWidth()-circle.getR()) {
+		colissionX = true;
+	}
+	if(circle.getY() <= 0) {
+		colissionY = true;
+	}
+	if(circle.getY() >= Toolkit.getDefaultToolkit().getScreenSize().getHeight()-30) {
+		ende = true;
+	}
+    if(colissionY) {
+    	my = my*(-1);
+    }
+    if(colissionX) {
+    	System.out.println("Colission X");
+    	mx = mx*(-1);
+    }
+    if(ende) {
+    	mx = 0;
+    	my = 0;
+    	x=Toolkit.getDefaultToolkit().getScreenSize().width/2;
+    	y=Toolkit.getDefaultToolkit().getScreenSize().height-100;
+    	circle.setX(x);
+    	circle.setY(y);
+    	laeuft = false;
+    	ende = false;
+    }
+    if(!laeuft) {
+    	System.out.println("Ende");
     }
     }
     

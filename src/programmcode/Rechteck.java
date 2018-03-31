@@ -1,7 +1,7 @@
 package programmcode;
 
 public class Rechteck {
-	private int x,y;
+	private double x,y;
 	private int width,height;
 	public Rechteck(int pX,int pY, int pWidth, int pHeight) {
 		x = pX;
@@ -10,11 +10,11 @@ public class Rechteck {
 		height = pHeight;
 	}
 	
-	public int getX() {
+	public double getX() {
 		return x;
 	}
 	
-	public int getY() {
+	public double getY() {
 		return y;
 	}
 	
@@ -26,11 +26,11 @@ public class Rechteck {
 		return height;
 	}
 	
-	public void setX(int pX) {
+	public void setX(double pX) {
 		x = pX;
 	}
 	
-	public void setY(int pY) {
+	public void setY(double pY) {
 		y= pY;
 	}
 }
