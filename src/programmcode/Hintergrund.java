@@ -16,9 +16,9 @@ public class Hintergrund implements Runnable{
   private Screen screen;
   private double x,y; 
   private double mx, my;
-  private ArrayList<Rectangle> rechteck = new ArrayList<Rectangle>();
+  private ArrayList<Rechteck> rechteck = new ArrayList<Rechteck>();
   private boolean laeuft = false;
-  private Circle circle = new Circle(Toolkit.getDefaultToolkit().getScreenSize().width/2,Toolkit.getDefaultToolkit().getScreenSize().height-100,20);
+  private Circle circle = new Circle(500,Toolkit.getDefaultToolkit().getScreenSize().height-105,20);
   
   
   public static final int FPS = 144;
@@ -35,8 +35,8 @@ public class Hintergrund implements Runnable{
   
   public void setLaeuft(boolean pLaeuft) {
 	  laeuft = pLaeuft;
-	  mx = -1;
-	  my = -0.1;
+	  mx = 0;
+	  my = -1;
 	  System.out.println("Start");
   }
   
@@ -51,10 +51,10 @@ public class Hintergrund implements Runnable{
   }
   
   public void rechtecke() {  
-	  rechteck.add(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize().width/2,1020,50,50));
-	  rechteck.add(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize().width/2,500,50,50));
-	  rechteck.add(new Rectangle(700,Toolkit.getDefaultToolkit().getScreenSize().height-100,50,50));
-	  rechteck.add(new Rectangle(1200,Toolkit.getDefaultToolkit().getScreenSize().height-100,50,50));
+	  rechteck.add(new Rechteck(470,1020,50,50,10));
+	  rechteck.add(new Rechteck(470,500,50,50,10));
+	  rechteck.add(new Rechteck(700,Toolkit.getDefaultToolkit().getScreenSize().height-100,50,50,10));
+	  rechteck.add(new Rechteck(1200,Toolkit.getDefaultToolkit().getScreenSize().height-100,50,50,10));
 	  System.out.println(""+rechteck.get(0).getHeight());
   }
   
@@ -67,12 +67,13 @@ public class Hintergrund implements Runnable{
     Graphics g = bs.getDrawGraphics();
     g.clearRect(0,0,screen.getWidth(),screen.getHeight());
     for(int i = 0; i < rechteck.size(); i++){
-    	g.fillRect((int)rechteck.get(i).x,(int)rechteck.get(i).y,rechteck.get(i).width,rechteck.get(i).height);
+    	g.drawRect((int)rechteck.get(i).getX(),(int)rechteck.get(i).getY(),rechteck.get(i).getWidth(),rechteck.get(i).getHeight());
+    	g.drawString(""+rechteck.get(i).getLeben(), (int)rechteck.get(i).getX()+17, (int)rechteck.get(i).getY()+29);
     }
     
     //Render start
     
-    g.fillOval((int)x,(int)y,(int) circle.getR(),(int) circle.getR());
+    g.fillOval((int)circle.getX()-circle.getR()/2,(int) circle.getY()-circle.getR()/2, circle.getR(), circle.getR());
     
     //Render ende
     g.setColor(Color.blue);
@@ -94,19 +95,28 @@ public class Hintergrund implements Runnable{
     boolean colissionY = false;
     boolean ende = false;
 	for(int i = 0; i < rechteck.size(); i++) {
-    	double distance = (Math.abs(rechteck.get(i).getX()+14-circle.getX())+Math.abs(rechteck.get(i).getY()+14-circle.getY()));
-    	System.out.println(""+distance);
-    	if(distance < circle.getR()+25 ) {
-    		colission = true;
-    		double distanceX = (Math.abs(rechteck.get(i).getX()+14-circle.getX()));
-    		double distanceY = (Math.abs(rechteck.get(i).getY()+14-circle.getY()));
-    		if(distanceX < circle.getR()+25&&circle.getY()+14>rechteck.get(i).getY()) {
-    			colissionX = true;
-    		}else if(distanceY < circle.getR()+25&&circle.getY()+14>rechteck.get(i).getY()) {
-    			colissionY = true;
-    		}	
-    	
+    	double distanceY = rechteck.get(i).getY()-circle.getY(); 
+    	double distanceX = rechteck.get(i).getX()-circle.getX();
+    boolean colissionY1 = false;
+    if(distanceY<circle.getR()/2&&distanceY>-(rechteck.get(i).getHeight()+circle.getR()/2)) {
+    	colissionY1 = true;
+    }	
+    if(distanceX<circle.getR()/2&&colissionY1&&distanceX > - (rechteck.get(i).getWidth()+circle.getR()/2)) {
+    	colission = true;
+    	rechteck.get(i).verliereLeben();
+		boolean loeschen = rechteck.get(i).istLebenNull();
+		if(loeschen) {
+			rechteck.remove(i);
+    }
+    if(colission) {
+    	if(distanceX>0||distanceX<-rechteck.get(i).getWidth()) {
+    		colissionX = true;
     	}
+    	if(distanceY>0||distanceY<-rechteck.get(i).getHeight()) {
+    		colissionY = true;
+    		}
+    	}
+    }
 
     }
 	if(circle.getX() <=0) {
@@ -120,13 +130,14 @@ public class Hintergrund implements Runnable{
 	}
 	if(circle.getY() >= Toolkit.getDefaultToolkit().getScreenSize().getHeight()-30) {
 		ende = true;
-	}
+		}
     if(colissionY) {
-    	my = my*(-1);
+    	my = -my;
+    	System.out.println("Colission Y");
     }
     if(colissionX) {
     	System.out.println("Colission X");
-    	mx = mx*(-1);
+    	mx = -mx;
     }
     if(ende) {
     	mx = 0;
@@ -137,6 +148,7 @@ public class Hintergrund implements Runnable{
     	circle.setY(y);
     	laeuft = false;
     	ende = false;
+    	System.out.println("Ende");
     }
     if(!laeuft) {
     	System.out.println("Ende");
