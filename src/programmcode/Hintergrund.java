@@ -14,18 +14,21 @@ import java.awt.*;
 public class Hintergrund implements Runnable{
   private boolean running;
   private Screen screen;
-  private double x,y; 
-  private double mx, my;
   private ArrayList<Rechteck> rechteck = new ArrayList<Rechteck>();
   private boolean laeuft = false;
-  private Circle circle = new Circle(500,Toolkit.getDefaultToolkit().getScreenSize().height-105,20);
+  private ArrayList<Kreissteuerung> kreis = new ArrayList<Kreissteuerung>();
+  private int Kreise = 1;
+  private double KreisX = Toolkit.getDefaultToolkit().getScreenSize().width/2;
+  private boolean erstes = false;
+  private long delay = 0;
   
   
   public static final int FPS = 144;
-  public static final int TPS = 128;
+  public static final int TPS = 1280;
 
   public Hintergrund() {
 	  screen = new Screen(this);
+	  
   }
   
   public synchronized void start(){
@@ -33,10 +36,18 @@ public class Hintergrund implements Runnable{
     new Thread(this).start();
   }
   
+  public void setDelay(int pDelay) {
+	 delay = pDelay*128/1000;
+  }
+  
+  public int getDelay() {
+	  return (int)delay;
+  }
+  
   public void setLaeuft(boolean pLaeuft) {
 	  laeuft = pLaeuft;
-	  mx = 0;
-	  my = -1;
+	  erstes = false;
+	  kreise();
 	  System.out.println("Start");
   }
   
@@ -45,17 +56,19 @@ public class Hintergrund implements Runnable{
   }
   
   public void init(){
-    x=Toolkit.getDefaultToolkit().getScreenSize().width/2;
-    y=Toolkit.getDefaultToolkit().getScreenSize().height-100;
     rechtecke();
   }
   
+  public void kreise() {
+	  
+		  kreis.add(new Kreissteuerung(new Kreis(KreisX,Toolkit.getDefaultToolkit().getScreenSize().height-100,20,0,-1),this));
+	  
+	  
+  }
+  
   public void rechtecke() {  
-	  rechteck.add(new Rechteck(470,1020,50,50,10));
-	  rechteck.add(new Rechteck(470,500,50,50,10));
-	  rechteck.add(new Rechteck(700,Toolkit.getDefaultToolkit().getScreenSize().height-100,50,50,10));
-	  rechteck.add(new Rechteck(1200,Toolkit.getDefaultToolkit().getScreenSize().height-100,50,50,10));
-	  System.out.println(""+rechteck.get(0).getHeight());
+	  
+	  rechteck.add(new Rechteck(Toolkit.getDefaultToolkit().getScreenSize().width/2+9,Toolkit.getDefaultToolkit().getScreenSize().height-200,50,50,10));
   }
   
   public void render() {
@@ -71,10 +84,14 @@ public class Hintergrund implements Runnable{
     	g.drawString(""+rechteck.get(i).getLeben(), (int)rechteck.get(i).getX()+17, (int)rechteck.get(i).getY()+29);
     }
     
-    //Render start
-    
-    g.fillOval((int)circle.getX()-circle.getR()/2,(int) circle.getY()-circle.getR()/2, circle.getR(), circle.getR());
-    
+    for(int i = 0; i<kreis.size();i++) {
+    	Kreis pKreis = kreis.get(i).getKreis();
+    	g.fillOval((int)(pKreis.getX()-pKreis.getRr()),(int)(pKreis.getY()-pKreis.getRr()), pKreis.getR(),pKreis.getR() );
+    	//System.out.println(pKreis.getX()+";" + pKreis.getY()+";" + pKreis.getR());
+    }
+    if(erstes) {
+    	g.fillOval((int)KreisX,(int) Toolkit.getDefaultToolkit().getScreenSize().getHeight()-100, 20, 20);
+    }
     //Render ende
     g.setColor(Color.blue);
     g.dispose();
@@ -83,78 +100,33 @@ public class Hintergrund implements Runnable{
   }
   
   public void tick() {
-    if(laeuft) {
-	x = circle.getX();
-	y = circle.getY();
-	x = x+mx;
-	y = y+my;
-	circle.setX(x);
-	circle.setY(y);
-    boolean colission = false;
-    boolean colissionX =  false;
-    boolean colissionY = false;
-    boolean ende = false;
-	for(int i = 0; i < rechteck.size(); i++) {
-    	double distanceY = rechteck.get(i).getY()-circle.getY(); 
-    	double distanceX = rechteck.get(i).getX()-circle.getX();
-    boolean colissionY1 = false;
-    if(distanceY<circle.getR()/2&&distanceY>-(rechteck.get(i).getHeight()+circle.getR()/2)) {
-    	colissionY1 = true;
-    }	
-    if(distanceX<circle.getR()/2&&colissionY1&&distanceX > - (rechteck.get(i).getWidth()+circle.getR()/2)) {
-    	colission = true;
-    	rechteck.get(i).verliereLeben();
-		boolean loeschen = rechteck.get(i).istLebenNull();
-		if(loeschen) {
+	if(laeuft) {
+	if(delay != 0) {
+		delay--;
+	}
+    for(int j = 0; j < kreis.size(); j++) {
+	for(int i = 0; i < rechteck.size(); i++) { 
+		Rechteck recht = kreis.get(j).kollision(rechteck.get(i));	
+		rechteck.set(i, recht);
+		if(rechteck.get(i).istLebenNull()) {
 			rechteck.remove(i);
-    }
-    if(colission) {
-    	if(distanceX>0||distanceX<-rechteck.get(i).getWidth()) {
-    		colissionX = true;
-    	}
-    	if(distanceY>0||distanceY<-rechteck.get(i).getHeight()) {
-    		colissionY = true;
-    		}
-    	}
-    }
-
-    }
-	if(circle.getX() <=0) {
-		colissionX = true;
-	}
-	if(circle.getX() >= Toolkit.getDefaultToolkit().getScreenSize().getWidth()-circle.getR()) {
-		colissionX = true;
-	}
-	if(circle.getY() <= 0) {
-		colissionY = true;
-	}
-	if(circle.getY() >= Toolkit.getDefaultToolkit().getScreenSize().getHeight()-30) {
-		ende = true;
 		}
-    if(colissionY) {
-    	my = -my;
-    	System.out.println("Colission Y");
+		if(!kreis.get(j).istDrin()) {
+			if(!erstes) {
+			KreisX = kreis.get(j).getKreis().getX();
+			erstes = true;
+			}
+			kreis.remove(j);
+		}
     }
-    if(colissionX) {
-    	System.out.println("Colission X");
-    	mx = -mx;
-    }
-    if(ende) {
-    	mx = 0;
-    	my = 0;
-    	x=Toolkit.getDefaultToolkit().getScreenSize().width/2;
-    	y=Toolkit.getDefaultToolkit().getScreenSize().height-100;
-    	circle.setX(x);
-    	circle.setY(y);
-    	laeuft = false;
-    	ende = false;
-    	System.out.println("Ende");
-    }
-    if(!laeuft) {
-    	System.out.println("Ende");
-    }
-    }
+    			if(!laeuft) {
+    				System.out.println("Ende");
+    			}
+	
     
+			}
+		
+	}
   }
   
   public void run(){
