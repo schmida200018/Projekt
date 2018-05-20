@@ -5,11 +5,13 @@ import java.awt.Toolkit;
 
 public class Kreissteuerung {
 	private Kreis kreis;
-	private Intersect inter = new Intersect();
 	private Rechteck rechteck;
 	private double x,y;
 	private boolean istDrin = true;
 	private Hintergrund hintergrund;
+	private long delay = 0;
+	private boolean anderesRechteck;
+	private double pPX,pPY;
 	
 	
 	public Kreissteuerung( Kreis pKreis, Hintergrund pHintergrund) {
@@ -17,6 +19,16 @@ public class Kreissteuerung {
 		System.out.println("Test");
 		hintergrund = pHintergrund;
 	}
+	
+	public long getDelay() {
+		return delay;
+	}
+	
+	public void verminderDelay() {
+		delay--;
+	}
+	
+	
 	public Rechteck kollision(Rechteck pRechteck) {
 	rechteck = pRechteck;
 	x = kreis.getX();
@@ -25,13 +37,19 @@ public class Kreissteuerung {
 	y = y+kreis.getMy();
 	kreis.setX(x);
 	kreis.setY(y);
-    
+	anderesRechteck = false;
+    if(rechteck.getX()!= pPX) {
+    	anderesRechteck = true;
+    }
+    if(rechteck.getY()!= pPY) {
+    	anderesRechteck = true;
+    }
 	boolean colission = false;
     boolean colissionX =  false;
     boolean colissionY = false;
     boolean ende = false;
-    if(hintergrund.getDelay()==0) {
-    	System.out.println(hintergrund.getDelay());
+    
+    if(delay == 0 || anderesRechteck) {
     double distanceY = rechteck.getY()-kreis.getY(); 
     double distanceX = rechteck.getX()-kreis.getX();
     boolean colissionY1 = false;
@@ -61,28 +79,28 @@ public class Kreissteuerung {
     	double distanceR4  = Math.pow(distanceX+50, 2)+Math.pow(distanceY+50, 2);
     	if(distanceR1 <(kreis.getR()/2)*(kreis.getR()/2)) {
     		//System.out.println(""+distanceY+";"+kreis.getR()/2);
-    		//System.out.println("col1");
-    		kreis = inter.handleIntersection(rechteck, kreis, 1);
+    		System.out.println("col1");
+    		kreis = handleIntersection(rechteck, kreis, 1);
     		colission = true;
     	}
     	if(distanceR2 <(kreis.getR()/2)*(kreis.getR()/2)) {
     		//System.out.println(""+distanceX+";"+distanceY);
-    		//System.out.println("col2");
-    		kreis = inter.handleIntersection(rechteck, new Kreis(kreis.getX()-rechteck.getWidth(),kreis.getY(),kreis.getR(),kreis.getMx(),kreis.getMy()),2);
+    		System.out.println("col2");
+    		kreis = handleIntersection(rechteck, new Kreis(kreis.getX()-rechteck.getWidth(),kreis.getY(),kreis.getR(),kreis.getMx(),kreis.getMy()),2);
     		kreis.setX(kreis.getX()+rechteck.getWidth());
     		colission = true;
     	}
     	if(distanceR3 <(kreis.getR()/2)*(kreis.getR()/2)) {
     		//System.out.println(""+distanceX+";"+distanceY);
-    		//System.out.println("col3");
-    		kreis = inter.handleIntersection(rechteck, new Kreis(kreis.getX(),kreis.getY()-rechteck.getHeight(),kreis.getR(),kreis.getMx(),kreis.getMy()),3);
+    		System.out.println("col3");
+    		kreis = handleIntersection(rechteck, new Kreis(kreis.getX(),kreis.getY()-rechteck.getHeight(),kreis.getR(),kreis.getMx(),kreis.getMy()),3);
     		kreis.setY(kreis.getY()+rechteck.getHeight());
     		colission = true;
     	}
     	if(distanceR4 <(kreis.getR()/2)*(kreis.getR()/2)) {
     		//System.out.println(""+distanceX+";"+distanceY);
-    		//System.out.println("col4");
-    		kreis = inter.handleIntersection(rechteck, new Kreis(kreis.getX()-rechteck.getWidth(),kreis.getY()-rechteck.getHeight(),kreis.getR(),kreis.getMx(),kreis.getMy()),4);
+    		System.out.println("col4");
+    		kreis = handleIntersection(rechteck, new Kreis(kreis.getX()-rechteck.getWidth(),kreis.getY()-rechteck.getHeight(),kreis.getR(),kreis.getMx(),kreis.getMy()),4);
     		kreis.setY(kreis.getY()+rechteck.getHeight());
     		kreis.setX(kreis.getX()+rechteck.getWidth());
     		colission = true;
@@ -90,9 +108,11 @@ public class Kreissteuerung {
     	
     }
     if(colission) {
-    	hintergrund.setDelay(1000);
+    	delay = 50;
     	rechteck.verliereLeben();
 		System.out.println("verliere Leben");
+		pPX = rechteck.getX();
+		pPY = rechteck.getY();
     }
     
     
@@ -105,7 +125,7 @@ public class Kreissteuerung {
 	if(kreis.getY() <= kreis.getR()/2) {
 		colissionY = true;
 	}
-	if(kreis.getY() >= Toolkit.getDefaultToolkit().getScreenSize().getHeight()-30) {
+	if(kreis.getY() >= Toolkit.getDefaultToolkit().getScreenSize().getHeight()-90) {
 		ende = true;
 		}
     if(colissionY) {
@@ -133,6 +153,80 @@ public class Kreissteuerung {
 	public boolean istDrin() {
 		return istDrin;
 	}
-	
+	public Kreis handleIntersection(Rechteck rechteck, Kreis kreis, int fall)
+    {
+
+        final double dx = kreis.getMx()*100;
+        final double dy = kreis.getMy()*100;
+    
+        double inverseRadius = 1.0 / (kreis.getRr());
+        double lineLength = Math.sqrt(dx*dx  + dy*dy );
+        double cornerdx =  rechteck.getX()- kreis.getX();
+        double cornerdy = rechteck.getY()-kreis.getY();
+        double cornerDistance = Math.sqrt( cornerdx * cornerdx + cornerdy * cornerdy );
+        double innerAngle = Math.acos( (cornerdx * dx + cornerdy * dy) / (lineLength * cornerDistance) );
+       
+        // If the circle is too close, no intersection.
+        System.out.println("test");
+        // If inner angle is zero, it's going to hit the corner straight on.
+        double innerAngleSin = Math.sin( innerAngle );
+        double angle1Sin = innerAngleSin * cornerDistance * inverseRadius;
+ 
+        double angle1 = Math.PI - Math.asin( angle1Sin );
+        double angle2 = Math.PI - innerAngle - angle1;
+        double intersectionDistance = kreis.getRr() * Math.sin( angle2 ) / innerAngleSin;
+        
+        // Solve for time
+        float time = (float)(intersectionDistance / lineLength);
+        
+        // Solve the intersection and normal
+        double ix = time * dx + kreis.getX();
+        double iy = time * dy + kreis.getY();
+       
+        double nx,ny;
+       
+        nx = (float)((ix - rechteck.getX()) *inverseRadius);
+        ny = (float)((iy - rechteck.getY()) *inverseRadius);
+        double dot = dx-2*nx+dy*ny;
+        double ndx = dx-2*dot*nx;
+        double ndy = dy-2*dot*ny;
+        
+        System.out.println(rechteck.getX()+";"+rechteck.getY()+";"+kreis.getX()+";"+kreis.getY());
+        
+        while(true) {
+        	if(ndx*ndx+ndy*ndy>1) {
+        	if(Math.sqrt(((ndx*ndx)+(ndy*ndy)))>1){
+        		
+        			ndx = ndx/ 1.001;
+        			ndy = ndy/1.001;
+        		
+        	}
+        	}else if(ndx*ndx+ndy*ndy<0.95){
+        			ndx = ndx*1.001;
+        			ndy = ndy*1.001;
+        	}else{
+        		break;
+        	}
+        }while(true) {
+        	if(nx*nx+ny*ny>1) {
+        	if(Math.sqrt(((nx*nx)+(ny*ny)))>1){
+        		
+        			nx = nx/ 1.001;
+        			ny = ny/1.001;
+        		
+        	}
+        	}else if(nx*nx+ny*ny<0.95){
+        			nx = nx*1.001;
+        			ny = ny*1.001;
+        	}else{
+        		break;
+        	}
+        }
+        
+        
+        System.out.println(ndx +";"+ndy);
+
+        return new Kreis( ix, iy, kreis.getR(), nx, ny);
+    }
 	
 }
