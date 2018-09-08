@@ -21,11 +21,9 @@ public class KeyEvt implements KeyListener{
 		}
 		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 			hintergrund.setSpace();
-			hintergrund.setLaeuft(true);
+			hintergrund.setLaeuft();
 		}
-		if(e.getKeyCode() == KeyEvent.VK_0) {
-			hintergrund.tickMalZehn();
-		}
+		
 		
 	}
 
@@ -40,13 +38,17 @@ public class KeyEvt implements KeyListener{
 		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 			hintergrund.delSpace();
 		}
-		if(e.getKeyCode() == KeyEvent.VK_1){
+		/*if(e.getKeyCode() == KeyEvent.VK_0){
 			hintergrund.tickDurchZehn();
-		}
+		}*/
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_0) {
+			hintergrund.tickMalZehn();
+			System.out.println("Test");
+		}
 		
 		
 	}
